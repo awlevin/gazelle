@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-paper: #eceee2;
+  --color-paper-deep: #e2e5d4;
+  --color-ink: #1f2618;
+  --color-fade: #68705c;
+  --color-moss: #3d5233;
+  --color-gaze: #c95f16;
+  --color-gaze-soft: #e9c4a5;
+
+  --font-serif: var(--font-literata), Georgia, serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+html {
+  background: var(--color-paper);
+}
+
+body {
+  color: var(--color-ink);
+  font-family: var(--font-serif);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-gaze-soft);
+}
+
+/* ——— Hero scanpath: a fixation dot leaping across the wordmark ——— */
+@keyframes scanpath-x {
+  0%, 10% { left: 3%; }
+  13%, 24% { left: 21%; }
+  27%, 38% { left: 38%; }
+  41%, 54% { left: 57%; }
+  57%, 70% { left: 74%; }
+  73%, 88% { left: 93%; }
+  91%, 100% { left: 3%; }
+}
+
+@keyframes fixation-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(0.72); opacity: 1; }
+}
+
+.scanpath-dot {
+  animation: scanpath-x 7s cubic-bezier(0.7, 0, 0.2, 1) infinite;
+}
+
+.scanpath-dot > span {
+  animation: fixation-pulse 1.17s ease-in-out infinite;
+}
+
+/* ——— Calibration point ——— */
+@keyframes calib-ring {
+  from { transform: scale(2.4); opacity: 0; }
+  20% { opacity: 1; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.calib-ring {
+  animation: calib-ring 0.7s ease-out forwards;
+}
+
+/* ——— Reading view ——— */
+.reading-pill {
+  transition:
+    left 130ms cubic-bezier(0.3, 1.2, 0.4, 1),
+    top 130ms cubic-bezier(0.3, 1.2, 0.4, 1),
+    width 130ms cubic-bezier(0.3, 1.2, 0.4, 1),
+    height 130ms cubic-bezier(0.3, 1.2, 0.4, 1);
+}
+
+.gaze-dot {
+  transition: transform 40ms linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scanpath-dot,
+  .scanpath-dot > span,
+  .calib-ring {
+    animation: none;
+  }
+  .reading-pill,
+  .gaze-dot {
+    transition: none;
+  }
+}
