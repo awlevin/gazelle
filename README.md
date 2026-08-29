@@ -14,9 +14,17 @@ function words.
 ![Gazelle advancing word to word](docs/pacer-demo.gif)
 
 That recording is the **pacer mode** — the same drill driven by a timer instead of a camera, so
-it can be captured without a face on screen. Gaze mode looks identical; the difference is that
-your eyes advance the mark rather than a clock. I have not recorded gaze mode, because doing it
-honestly means recording my own face.
+it can be captured without a face on screen.
+
+![The reader driven by a simulated gaze trace](docs/gaze-demo.gif)
+
+**Simulated gaze trace — this is not eye tracking, and no camera was used.** A synthetic scanpath
+(`lib/gaze/demo.ts`, switched on with `?demo=1`) is fed into the reader in place of the calibrated
+gaze estimate: saccades, 200–320 ms fixations, landing error, the occasional regression. Everything
+reacting to it is the real code — landing detection, the drift nudge, the regression and skip
+counters, live WPM — so this shows what the reader *does* once a gaze signal arrives. It does
+**not** show that the tracking works. That claim needs a recording of my own face, which I have
+not made.
 
 ![The Gazelle setup screen](docs/home.png)
 
@@ -63,6 +71,10 @@ npm run dev
 ```
 
 Open <http://localhost:3000>, allow camera access, calibrate, read.
+
+No camera to hand? <http://localhost:3000/?demo=1> drives the reader from the synthetic
+scanpath instead, skipping calibration — handy for working on the reading view. It says so on
+screen the whole time, because it is not eye tracking.
 
 The `postinstall` step (`scripts/setup-assets.mjs`) needs network access once: it copies the WASM
 bundle out of `node_modules` and downloads `face_landmarker.task` from the MediaPipe model zoo into

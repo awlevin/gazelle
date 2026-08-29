@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { GazeEngine } from "@/lib/gaze/engine";
+import { DemoGazeEngine } from "@/lib/gaze/demo";
 import { PASSAGES, tokenize, selectTargets, wordCount, type Passage } from "@/lib/text";
 import { saveSession } from "@/lib/sessions";
 import Calibration from "@/components/Calibration";
@@ -11,6 +12,9 @@ import FreeLook from "@/components/FreeLook";
 
 type Stage = "home" | "loading" | "calibrate" | "read" | "results" | "freelook";
 type Mode = "gaze" | "pacer";
+
+const subscribeNever = () => () => {};
+const readDemoFlag = () => new URLSearchParams(window.location.search).get("demo") === "1";
 
 const SPANS = [
   { value: 2, label: "Tight", hint: "leap every ~2 words" },
@@ -33,6 +37,10 @@ export default function Home() {
   const [calibRms, setCalibRms] = useState<number | null>(null);
   const [afterCalibrate, setAfterCalibrate] = useState<"read" | "freelook">("read");
   const [calibPreview, setCalibPreview] = useState(true);
+  // `?demo=1` swaps the camera for a synthetic scanpath — see lib/gaze/demo.ts.
+  // It drives the real reader, but it is not eye tracking, so it is labelled
+  // on screen the whole time it runs.
+  const demo = useSyncExternalStore(subscribeNever, readDemoFlag, () => false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -69,11 +77,11 @@ export default function Home() {
     try {
       let active = engine;
       if (!active) {
-        active = new GazeEngine();
+        active = demo ? new DemoGazeEngine() : new GazeEngine();
         await active.init(videoRef.current!);
         setEngine(active);
       }
-      setStage(active.model.fitted ? dest : "calibrate");
+      setStage(active.calibrated ? dest : "calibrate");
     } catch (e) {
       console.error(e);
       if (!engine && videoRef.current) {
@@ -88,7 +96,7 @@ export default function Home() {
       );
       setStage("home");
     }
-  }, [engine, mode, words.length]);
+  }, [demo, engine, mode, words.length]);
 
   const cameraVisible = stage === "calibrate" && calibPreview;
 
@@ -362,6 +370,13 @@ export default function Home() {
             setStage("results");
           }}
         />
+      )}
+
+      {demo && (
+        <div className="pointer-events-none fixed bottom-3 left-5 z-[70] flex items-center gap-2 rounded-full border border-gaze/50 bg-paper/90 px-3.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-ink/80 backdrop-blur-sm">
+          <span className="inline-block h-2 w-2 shrink-0 rounded-full bg-gaze" />
+          Simulated gaze trace · no camera · not eye tracking
+        </div>
       )}
 
       {stage === "results" && stats && (

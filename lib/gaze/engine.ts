@@ -15,8 +15,8 @@ export class GazeEngine {
   private landmarker: FaceLandmarker | null = null;
   private stream: MediaStream | null = null;
   private video: HTMLVideoElement | null = null;
-  private running = false;
-  private rafId = 0;
+  protected running = false;
+  protected rafId = 0;
   private lastVideoTime = -1;
 
   private fx = new OneEuro(1.0, 0.35);
@@ -30,8 +30,8 @@ export class GazeEngine {
   private offsetX = 0;
   private offsetY = 0;
 
-  private frameListeners = new Set<(f: GazeFrame) => void>();
-  private gazeListeners = new Set<(p: GazePoint) => void>();
+  protected frameListeners = new Set<(f: GazeFrame) => void>();
+  protected gazeListeners = new Set<(p: GazePoint) => void>();
 
   latestFrame: GazeFrame | null = null;
   latestGaze: GazePoint | null = null;
@@ -66,7 +66,7 @@ export class GazeEngine {
     this.loop();
   }
 
-  private loop = () => {
+  protected loop = () => {
     if (!this.running || !this.video || !this.landmarker) return;
     const video = this.video;
     if (video.readyState >= 2 && video.currentTime !== this.lastVideoTime) {
@@ -127,6 +127,11 @@ export class GazeEngine {
 
   get ready(): boolean {
     return this.landmarker !== null && this.video !== null;
+  }
+
+  /** Whether a gaze model is available, i.e. the reader can be driven. */
+  get calibrated(): boolean {
+    return this.model.fitted;
   }
 
   dispose() {

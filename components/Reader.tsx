@@ -176,6 +176,10 @@ export default function Reader({
         cy: r.top + r.height / 2,
         rx: Math.max(r.width * 0.85, 95 + slack * 0.8) * rxScale,
         ry: Math.max(r.height * 1.2, 58 + slack * 0.5),
+        // Half-height of the word's own line box. The landing ellipse is
+        // taller than the line pitch on purpose, so it cannot also decide
+        // *which* line the eyes are on — that needs this tighter band.
+        line: r.height * 0.8,
       };
     };
     const inZone = (g: GazePoint, z: NonNullable<ReturnType<typeof zone>>) =>
@@ -193,7 +197,10 @@ export default function Reader({
         const z = zone(targets[ti + 1]);
         if (z) {
           const hit = inZone(g, z);
-          const passed = Math.abs(g.y - z.cy) < z.ry && g.x > z.cx;
+          // "Read past it": on that word's own line and beyond it. Judged on
+          // the line band, not the landing ellipse — the ellipse overlaps the
+          // neighbouring lines, so using it made every line wrap skip words.
+          const passed = Math.abs(g.y - z.cy) < z.line && g.x > z.cx;
           if (hit || passed) {
             if (++nextFramesRef.current >= ADVANCE_FRAMES) {
               // A landing is a weak ground-truth signal: the eyes are (about)
@@ -377,6 +384,10 @@ export default function Reader({
                       ref={(el) => {
                         wordRefs.current[w.index] = el;
                       }}
+                      // Marks the two live fixation targets in the DOM. Read by
+                      // the demo gaze source (lib/gaze/demo.ts) to aim its
+                      // synthetic scanpath; harmless otherwise.
+                      data-gaze-target={isCurrent ? "current" : isNext ? "next" : undefined}
                       className={[
                         "relative transition-colors duration-150",
                         read && !isCurrent ? "text-fade/70" : "text-ink",
