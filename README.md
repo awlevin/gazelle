@@ -18,6 +18,11 @@ it can be captured without a face on screen. Gaze mode looks identical; the diff
 your eyes advance the mark rather than a clock. I have not recorded gaze mode, because doing it
 honestly means recording my own face.
 
+![The Gazelle setup screen](docs/home.png)
+
+You pick a passage (or paste your own text), a drive — webcam gaze or the pacer — and a fixation
+span: how many words the mark leaps at a time.
+
 ## How it works
 
 - **Gaze tracking** — [MediaPipe Face Landmarker](https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker)
